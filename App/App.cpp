@@ -237,30 +237,29 @@ uint32_t load_enclaves()
 */
 int _tmain(int argc, _TCHAR* argv[])
 {
-    uint32_t ret_status;
-    sgx_status_t status;
-    uint32_t enclave_temp_no;
-
     UNUSED(argc);
     UNUSED(argv);
     
-    //-----------------------------------------------
+    //enclave 1
     sgx_launch_token_t launch_token1 = {0};
     int launch_token_updated1 = 0;
     char *E_PATH1="libenclave1.so";
     sgx_status_t ret1;
     
-    
+    //enclave 2
     sgx_launch_token_t launch_token2 = {0};
     int launch_token_updated2 = 0;
     char *E_PATH2="libenclave2.so";
     sgx_status_t ret2;
     
+    //enclave 3
     sgx_launch_token_t launch_token3 = {0};
     int launch_token_updated3 = 0;
     char *E_PATH3="libenclave3.so";
     sgx_status_t ret3;
     
+    //keep record of enclaves in map
+    uint32_t enclave_temp_no;
     enclave_temp_no=0;
     
     ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
@@ -268,24 +267,46 @@ int _tmain(int argc, _TCHAR* argv[])
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e1_enclave_id, enclave_temp_no));
 	}
+	else{
+        print_error_message(ret1);
+        //return -1; 
+    }
     
     ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
     if(ret1==SGX_SUCCESS){
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e2_enclave_id, enclave_temp_no));
 	}
+	else{
+        print_error_message(ret2);
+        //return -1; 
+    }
     ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
     if(ret1==SGX_SUCCESS){
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e3_enclave_id, enclave_temp_no));
 	}
-    //-----------------------------------------------
-	/*
-    if(load_enclaves() != SGX_SUCCESS)
-    {
-        printf("\nLoad Enclave Failure");
+	else{
+        print_error_message(ret3);
+        //return -1; 
     }
-	*/
+
+	//if all the enclaves were not loaded, exit ! 
+	//make sure that before exiting, unload the enclaves which were loaded successfully
+	if(ret1!=SGX_SUCCESS ||ret2!=SGX_SUCCESS ||ret3!=SGX_SUCCESS){
+		printf("\nExiting as all enclaves could not be initialized properly");
+		if(ret1==SGX_SUCCESS){
+			sgx_destroy_enclave(e1_enclave_id);
+		}
+		if(ret2==SGX_SUCCESS){
+			sgx_destroy_enclave(e2_enclave_id);
+		}
+		if(ret3==SGX_SUCCESS){
+			sgx_destroy_enclave(e3_enclave_id);
+		}
+		return 0;
+	}
+	
     printf("\nAvaliable Enclaves");
     printf("\nEnclave1 - EnclaveID %" PRIx64, e1_enclave_id);
     printf("\nEnclave2 - EnclaveID %" PRIx64, e2_enclave_id);
@@ -293,6 +314,12 @@ int _tmain(int argc, _TCHAR* argv[])
     
 	//attestation goes here
 	//Test Create session between Enclave1(Source) and Enclave2(Destination)
+	
+	
+	uint32_t ret_status;
+    sgx_status_t status;
+    
+    
 	status = Enclave1_test_create_session(e1_enclave_id, &ret_status, e1_enclave_id, e2_enclave_id);
 	if (status!=SGX_SUCCESS)
 	{
@@ -344,6 +371,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			printf("\n\nMessage Exchange failure between Source (E1) and Destination (E2): Error code is %x", ret_status);
 		}
 	}
+	
+	
+	
 	//Test Create session between Enclave1(Source) and Enclave3(Destination)
 	status = Enclave1_test_create_session(e1_enclave_id, &ret_status, e1_enclave_id, e3_enclave_id);
 	if (status!=SGX_SUCCESS)
@@ -578,7 +608,7 @@ int _tmain(int argc, _TCHAR* argv[])
     sgx_destroy_enclave(e2_enclave_id);
     sgx_destroy_enclave(e3_enclave_id);
 
-    waitForKeyPress();
+    //waitForKeyPress();
 
     return 0;
 }

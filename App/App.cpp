@@ -239,6 +239,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
     uint32_t ret_status;
     sgx_status_t status;
+    uint32_t enclave_temp_no;
 
     UNUSED(argc);
     UNUSED(argv);
@@ -260,11 +261,24 @@ int _tmain(int argc, _TCHAR* argv[])
     char *E_PATH3="libenclave3.so";
     sgx_status_t ret3;
     
+    enclave_temp_no=0;
     
     ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
-    ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
-    ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
+    if(ret1==SGX_SUCCESS){
+		enclave_temp_no++;
+		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e1_enclave_id, enclave_temp_no));
+	}
     
+    ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
+    if(ret1==SGX_SUCCESS){
+		enclave_temp_no++;
+		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e2_enclave_id, enclave_temp_no));
+	}
+    ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
+    if(ret1==SGX_SUCCESS){
+		enclave_temp_no++;
+		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e3_enclave_id, enclave_temp_no));
+	}
     //-----------------------------------------------
 	/*
     if(load_enclaves() != SGX_SUCCESS)

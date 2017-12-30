@@ -152,7 +152,14 @@ static sgx_errlist_t sgx_errlist[] = {
         "SGX_ERROR_NDEBUG_ENCLAVE: The enclave is signed as product enclave, and can not be created as debuggable enclave.",
         NULL
     },
+    {
+        SGX_ERROR_SERVICE_UNAVAILABLE,
+        "SGX_ERROR_SERVICE_UNAVAILABLE: The Plateform services are not running.",
+        "Please try to restart the platform service: sudo service aesmd restart"
+    }
 };
+
+
 
 //Check error conditions for loading enclave 
 //modified to give more detailed information

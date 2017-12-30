@@ -38,7 +38,6 @@
 #include "../Enclave3/Enclave3_u.h"
 #include "sgx_eid.h"
 #include "sgx_urts.h"
-#include "omp.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
@@ -288,44 +287,6 @@ void reportCloseAttestationSessionStatus(sgx_enclave_id_t source_enclave_id, sgx
 	
 }
 
-/*
-uint32_t load_enclaves()
-{
-    uint32_t enclave_temp_no;
-    int ret, launch_token_updated;
-    sgx_launch_token_t launch_token;
-
-    enclave_temp_no = 0;
-
-    ret = sgx_create_enclave(ENCLAVE1_PATH, SGX_DEBUG_FLAG, &launch_token, &launch_token_updated, &e1_enclave_id, NULL);
-    if (ret != SGX_SUCCESS) {
-                return ret;
-    }
-
-    enclave_temp_no++;
-    g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e1_enclave_id, enclave_temp_no));
-
-    ret = sgx_create_enclave(ENCLAVE2_PATH, SGX_DEBUG_FLAG, &launch_token, &launch_token_updated, &e2_enclave_id, NULL);
-    if (ret != SGX_SUCCESS) {
-                return ret;
-    }
-
-    enclave_temp_no++;
-    g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e2_enclave_id, enclave_temp_no));
-
-    ret = sgx_create_enclave(ENCLAVE3_PATH, SGX_DEBUG_FLAG, &launch_token, &launch_token_updated, &e3_enclave_id, NULL);
-    if (ret != SGX_SUCCESS) {
-                return ret;
-    }
-
-    enclave_temp_no++;
-    g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e3_enclave_id, enclave_temp_no));
-
-
-
-    return SGX_SUCCESS;
-}
-*/
 int _tmain(int argc, _TCHAR* argv[])
 {
     UNUSED(argc);
@@ -395,6 +356,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		if(ret3==SGX_SUCCESS){
 			sgx_destroy_enclave(e3_enclave_id);
 		}
+		printf("\n");
 		return 0;
 	}
 	
@@ -404,11 +366,6 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("\nEnclave3 - EnclaveID %" PRIx64, e3_enclave_id);
     
 	//attestation goes here
-	
-	sgx_status_t status;
-	uint32_t ret_status;
-	int error_stage;
-    
     sgx_status_t status12;
 	uint32_t ret_status12;
 	int error_stage12;
@@ -476,88 +433,15 @@ int _tmain(int argc, _TCHAR* argv[])
 	//closing local attestation session between enclave 3 & 1
 	status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
 	reportCloseAttestationSessionStatus(e3_enclave_id, e1_enclave_id, status31 , ret_status31);
-
-
-/*
-
-	//Test Closing Session between Enclave1(Source) and Enclave2(Destination)
-	status = Enclave1_test_close_session(e1_enclave_id, &ret_status, e1_enclave_id, e2_enclave_id);
-	if (status!=SGX_SUCCESS)
-	{
-		printf("Enclave1_test_close_session Ecall failed: Error code is %x", status);
-	}
-	else
-	{
-		if(ret_status==0)
-		{
-			printf("\n\nClose Session between Source (E1) and Destination (E2) Enclaves successful !!!");
-		}
-		else
-		{
-			printf("\n\nClose session failure between Source (E1) and Destination (E2): Error code is %x", ret_status);
-		}
-	}
-	//Test Closing Session between Enclave1(Source) and Enclave3(Destination)
-	status = Enclave1_test_close_session(e1_enclave_id, &ret_status, e1_enclave_id, e3_enclave_id);
-	if (status!=SGX_SUCCESS)
-	{
-		printf("Enclave1_test_close_session Ecall failed: Error code is %x", status);
-	}
-	else
-	{
-		if(ret_status==0)
-		{
-			printf("\n\nClose Session between Source (E1) and Destination (E3) Enclaves successful !!!");
-		}
-		else
-		{
-			printf("\n\nClose session failure between Source (E1) and Destination (E3): Error code is %x", ret_status);
-		}
-	}
-	//Test Closing Session between Enclave2(Source) and Enclave3(Destination)
-	status = Enclave2_test_close_session(e2_enclave_id, &ret_status, e2_enclave_id, e3_enclave_id);
-	if (status!=SGX_SUCCESS)
-	{
-		printf("Enclave2_test_close_session Ecall failed: Error code is %x", status);
-	}
-	else
-	{
-		if(ret_status==0)
-		{
-			printf("\n\nClose Session between Source (E2) and Destination (E3) Enclaves successful !!!");
-		}
-		else
-		{
-			printf("\n\nClose session failure between Source (E2) and Destination (E3): Error code is %x", ret_status);
-		}
-	}
-	//Test Closing Session between Enclave3(Source) and Enclave1(Destination)
-	status = Enclave3_test_close_session(e3_enclave_id, &ret_status, e3_enclave_id, e1_enclave_id);
-	if (status!=SGX_SUCCESS)
-	{
-		printf("Enclave3_test_close_session Ecall failed: Error code is %x", status);
-	}
-	else
-	{
-		if(ret_status==0)
-		{
-			printf("\n\nClose Session between Source (E3) and Destination (E1) Enclaves successful !!!");
-		}
-		else
-		{
-			printf("\n\nClose session failure between Source (E3) and Destination (E1): Error code is %x", ret_status);
-		}
-	}
-*/
-	
 	//attestation ends
 	
-
+	
+	//destroy all enclaves
     sgx_destroy_enclave(e1_enclave_id);
     sgx_destroy_enclave(e2_enclave_id);
     sgx_destroy_enclave(e3_enclave_id);
 
     //waitForKeyPress();
-
+	printf("\n");
     return 0;
 }

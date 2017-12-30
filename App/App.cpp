@@ -56,11 +56,11 @@ extern std::map<sgx_enclave_id_t, uint32_t>g_enclave_id_map;
 sgx_enclave_id_t e1_enclave_id = 0;
 sgx_enclave_id_t e2_enclave_id = 0;
 sgx_enclave_id_t e3_enclave_id = 0;
-
+/*
 #define ENCLAVE1_PATH "libenclave1.so"
 #define ENCLAVE2_PATH "libenclave2.so"
 #define ENCLAVE3_PATH "libenclave3.so"
-
+*/
 
 //======================================================================
 // this Error handling code is taken and modified from:
@@ -187,8 +187,17 @@ void waitForKeyPress()
     temp = scanf_s("%c", &ch);
 }
 
-
-
+sgx_status_t initialize_enclave(char *ENCLAVE_PATH, sgx_launch_token_t *launch_token, int *launch_token_updated, sgx_enclave_id_t *enclave_id)
+{
+    sgx_status_t ret;
+    
+    ret = sgx_create_enclave(ENCLAVE_PATH, SGX_DEBUG_FLAG, launch_token, launch_token_updated, enclave_id, NULL);
+    if (ret != SGX_SUCCESS) {
+        return ret;
+    }
+    return SGX_SUCCESS;
+}
+/*
 uint32_t load_enclaves()
 {
     uint32_t enclave_temp_no;
@@ -225,7 +234,7 @@ uint32_t load_enclaves()
 
     return SGX_SUCCESS;
 }
-
+*/
 int _tmain(int argc, _TCHAR* argv[])
 {
     uint32_t ret_status;
@@ -235,15 +244,34 @@ int _tmain(int argc, _TCHAR* argv[])
     UNUSED(argv);
     
     //-----------------------------------------------
+    sgx_launch_token_t launch_token1 = {0};
+    int launch_token_updated1 = 0;
+    char *E_PATH1="libenclave1.so";
+    sgx_status_t ret1;
     
+    
+    sgx_launch_token_t launch_token2 = {0};
+    int launch_token_updated2 = 0;
+    char *E_PATH2="libenclave2.so";
+    sgx_status_t ret2;
+    
+    sgx_launch_token_t launch_token3 = {0};
+    int launch_token_updated3 = 0;
+    char *E_PATH3="libenclave3.so";
+    sgx_status_t ret3;
+    
+    
+    ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
+    ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
+    ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
     
     //-----------------------------------------------
-	
+	/*
     if(load_enclaves() != SGX_SUCCESS)
     {
         printf("\nLoad Enclave Failure");
     }
-	
+	*/
     printf("\nAvaliable Enclaves");
     printf("\nEnclave1 - EnclaveID %" PRIx64, e1_enclave_id);
     printf("\nEnclave2 - EnclaveID %" PRIx64, e2_enclave_id);

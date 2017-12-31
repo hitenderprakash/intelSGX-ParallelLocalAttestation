@@ -273,7 +273,7 @@ App/%.o: App/%.cpp Enclave1/Enclave1_u.h Enclave2/Enclave2_u.h Enclave3/Enclave3
 	@echo "CXX  <=  $<"
 
 $(App_Name): App/Enclave1_u.o App/Enclave2_u.o App/Enclave3_u.o $(App_Cpp_Objects) $(UnTrustLib_Name)
-	@$(CXX) $^ -o $@ $(App_Link_Flags)
+	@$(CXX) $^ -o $@ $(App_Link_Flags) -fopenmp
 	@echo "LINK =>  $@"
 
 

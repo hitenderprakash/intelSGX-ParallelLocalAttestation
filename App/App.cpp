@@ -40,6 +40,7 @@
 #include "sgx_urts.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#include "omp.h"
 
 
 #define UNUSED(val) (void)(val)
@@ -321,7 +322,33 @@ int _tmain(int argc, _TCHAR* argv[])
     uint32_t enclave_temp_no;
     enclave_temp_no=0;
     
-    ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
+    // parallel enclave creation=================================
+    #pragma omp parallel
+	{
+		#pragma omp sections
+		{
+			#pragma omp section
+			{
+				ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
+				printf("\nThread: %d started Section 1.1",omp_get_thread_num());
+
+			}
+			#pragma omp section
+			{
+				ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
+				//printf("\nThread: %d started Section 1.2",omp_get_thread_num());
+
+			}
+			#pragma omp section
+			{
+				ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
+				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+			}
+		}
+	}
+    // parallel enclave creation=================================
+    
+    //ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
     if(ret1==SGX_SUCCESS){
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e1_enclave_id, enclave_temp_no));
@@ -331,7 +358,7 @@ int _tmain(int argc, _TCHAR* argv[])
         //return -1; 
     }
     
-    ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
+    //ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
     if(ret1==SGX_SUCCESS){
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e2_enclave_id, enclave_temp_no));
@@ -340,7 +367,7 @@ int _tmain(int argc, _TCHAR* argv[])
         print_error_message(ret2);
         //return -1; 
     }
-    ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
+    //ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
     if(ret1==SGX_SUCCESS){
 		enclave_temp_no++;
 		g_enclave_id_map.insert(std::pair<sgx_enclave_id_t, uint32_t>(e3_enclave_id, enclave_temp_no));
@@ -389,8 +416,39 @@ int _tmain(int argc, _TCHAR* argv[])
     uint32_t ret_status31;
     int error_stage31;
     
+    // parallel enclave local attestation=================================
+    #pragma omp parallel
+	{
+		#pragma omp sections
+		{
+			#pragma omp section
+			{
+				status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
+				//printf("\nThread: %d started Section 1.1",omp_get_thread_num());
+
+			}
+			#pragma omp section
+			{
+				status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
+				//printf("\nThread: %d started Section 1.2",omp_get_thread_num());
+
+			}
+			#pragma omp section
+			{
+				status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
+				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+			}
+			#pragma omp section
+			{
+				status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
+				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+			}
+		}
+	}
+    // parallel enclave local attestation=================================
+    
     //local attestation 1 &2
-    status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
+    //status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
     if(status12==SGX_SUCCESS && ret_status12==0){
 		reportLocalAttestationSuccess(e1_enclave_id, e2_enclave_id);
 	}
@@ -399,7 +457,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
     
     //local attestation 1 & 3
-    status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
+    //status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
     if(status13==SGX_SUCCESS && ret_status13==0){
 		reportLocalAttestationSuccess(e1_enclave_id, e3_enclave_id);
 	}
@@ -408,7 +466,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	//local attestation 2 & 3
-	status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
+	//status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
     if(status23==SGX_SUCCESS && ret_status23==0){
 		reportLocalAttestationSuccess(e2_enclave_id, e3_enclave_id);
 	}
@@ -417,7 +475,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	//local attestation 3 & 1
-	status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
+	//status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
     if(status31==SGX_SUCCESS && ret_status31==0){
 		reportLocalAttestationSuccess(e3_enclave_id, e1_enclave_id);
 	}

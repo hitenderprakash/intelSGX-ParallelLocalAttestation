@@ -269,7 +269,7 @@ App/Enclave3_u.o: Enclave3/Enclave3_u.c
 	@echo "CC   <=  $<"
 
 App/%.o: App/%.cpp Enclave1/Enclave1_u.h Enclave2/Enclave2_u.h Enclave3/Enclave3_u.h
-	@$(CXX) $(App_Compile_Flags) -c $< -o $@
+	@$(CXX) $(App_Compile_Flags) -c $< -o $@ -fopenmp
 	@echo "CXX  <=  $<"
 
 $(App_Name): App/Enclave1_u.o App/Enclave2_u.o App/Enclave3_u.o $(App_Cpp_Objects) $(UnTrustLib_Name)

@@ -233,21 +233,21 @@ sgx_status_t enclavesLocalAttestation(sgx_enclave_id_t source_enclave_id, sgx_en
 }
 
 void reportLocalAttestationSuccess(sgx_enclave_id_t source_enclave_id, sgx_enclave_id_t dest_enclave_id){
-	printf("\nLocal attestation between Source Enclave (%d) and Destination Enclave (%d) Successfull",source_enclave_id,dest_enclave_id);
-	printf("\nSecure Channel Establishment between Source Enclave (%d) and Destination Enclave (%d) was successful",source_enclave_id,dest_enclave_id);
-	printf("\nEnclave to Enclave Call between Source Enclaves (%d) and Destination Enclaves (%d) was successful",source_enclave_id,dest_enclave_id);
-	printf("\nMessage Exchange between Source Enclaves (%d) and Destination Enclaves (%d) was successful",source_enclave_id,dest_enclave_id);
+	printf("\nLocal attestation between Source Enclave (%lu) and Destination Enclave (%lu) Successfull",source_enclave_id,dest_enclave_id);
+	printf("\nSecure Channel Establishment between Source Enclave (%lu) and Destination Enclave (%lu) was successful",source_enclave_id,dest_enclave_id);
+	printf("\nEnclave to Enclave Call between Source Enclaves (%lu) and Destination Enclaves (%lu) was successful",source_enclave_id,dest_enclave_id);
+	printf("\nMessage Exchange between Source Enclaves (%lu) and Destination Enclaves (%lu) was successful",source_enclave_id,dest_enclave_id);
 }
 
 void reportLocalAttestationError(sgx_enclave_id_t source_enclave_id, sgx_enclave_id_t dest_enclave_id, sgx_status_t status, uint32_t ret_status, int error_stage){
-	printf("\nLocal attestation between source enclave (%d) and destination enclave (%d) Failed",source_enclave_id,dest_enclave_id);
+	printf("\nLocal attestation between source enclave (%lu) and destination enclave (%lu) Failed",source_enclave_id,dest_enclave_id);
 	if(error_stage==-1){
 		if(status!=SGX_SUCCESS){
 			printf("\nEnclave1_test_create_session Ecall failed: Error code is %x", status);
 		}		
 		if(ret_status!=0)
 		{
-			printf("\nSession establishment and key exchange failure between Source Enclave (%d) and Destination Enclave (%d): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
+			printf("\nSession establishment and key exchange failure between Source Enclave (%lu) and Destination Enclave (%lu): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
 		}
 	}
 	else if(error_stage==-2){
@@ -257,7 +257,7 @@ void reportLocalAttestationError(sgx_enclave_id_t source_enclave_id, sgx_enclave
 		
 		if(ret_status!=0)
 		{
-			printf("\n\nEnclave to Enclave Call failure between Source Enclaves (%d) and Destination (%d): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
+			printf("\n\nEnclave to Enclave Call failure between Source Enclaves (%lu) and Destination Enclave(%lu): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
 		}
 	}
 	else if(error_stage==-3){
@@ -267,7 +267,7 @@ void reportLocalAttestationError(sgx_enclave_id_t source_enclave_id, sgx_enclave
 		
 		if(ret_status!=0)
 		{
-			printf("\nMessage Exchange failure between Source Enclaves (%d) and Destination (%d): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
+			printf("\nMessage Exchange failure between Source Enclaves (%lu) and Destination Enclave(%lu): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
 		}
 	}	
 }
@@ -280,7 +280,7 @@ sgx_status_t closeLocalAttestationSession(sgx_enclave_id_t source_enclave_id, sg
 
 void reportCloseAttestationSessionStatus(sgx_enclave_id_t source_enclave_id, sgx_enclave_id_t dest_enclave_id, sgx_status_t status,uint32_t ret_status){
 	if (status!=SGX_SUCCESS || ret_status==0){
-		printf("\nClose Session between Source Enclave (%d) and Destination Enclave (%d) successful",source_enclave_id,dest_enclave_id);
+		printf("\nClose Session between Source Enclave (%lu) and Destination Enclave (%lu) successful",source_enclave_id,dest_enclave_id);
 	}
 	else{
 		if(status!=SGX_SUCCESS)
@@ -289,7 +289,7 @@ void reportCloseAttestationSessionStatus(sgx_enclave_id_t source_enclave_id, sgx
 		}
 		if(ret_status!=0)
 		{
-			printf("\nClose session failure between Source Enclave (%d) and Destination Enclave (%d): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
+			printf("\nClose session failure between Source Enclave (%lu) and Destination Enclave (%lu): Error code is %x",source_enclave_id,dest_enclave_id,ret_status);
 		}		
 	}
 	
@@ -303,19 +303,19 @@ int _tmain(int argc, _TCHAR* argv[])
     //enclave 1
     sgx_launch_token_t launch_token1 = {0};
     int launch_token_updated1 = 0;
-    char *E_PATH1="libenclave1.so";
+    char *E_PATH1=(char*)"libenclave1.so";
     sgx_status_t ret1;
     
     //enclave 2
     sgx_launch_token_t launch_token2 = {0};
     int launch_token_updated2 = 0;
-    char *E_PATH2="libenclave2.so";
+    char *E_PATH2=(char*)"libenclave2.so";
     sgx_status_t ret2;
     
     //enclave 3
     sgx_launch_token_t launch_token3 = {0};
     int launch_token_updated3 = 0;
-    char *E_PATH3="libenclave3.so";
+    char *E_PATH3=(char*)"libenclave3.so";
     sgx_status_t ret3;
     
     //keep record of enclaves in map
@@ -323,6 +323,7 @@ int _tmain(int argc, _TCHAR* argv[])
     enclave_temp_no=0;
     
     // parallel enclave creation=================================
+    printf("\n\n====Enclaves creation session section==========");
     #pragma omp parallel
 	{
 		#pragma omp sections
@@ -330,19 +331,17 @@ int _tmain(int argc, _TCHAR* argv[])
 			#pragma omp section
 			{
 				ret1 = initialize_enclave(E_PATH1, &launch_token1, &launch_token_updated1, &e1_enclave_id);
-				printf("\nThread: %d started Section 1.1",omp_get_thread_num());
-
+				printf("\nThread: %d created Enclave %lu",omp_get_thread_num(),e1_enclave_id);
 			}
 			#pragma omp section
 			{
 				ret2 = initialize_enclave(E_PATH2, &launch_token2, &launch_token_updated2, &e2_enclave_id);
-				//printf("\nThread: %d started Section 1.2",omp_get_thread_num());
-
+				printf("\nThread: %d created Enclave %lu",omp_get_thread_num(),e2_enclave_id);
 			}
 			#pragma omp section
 			{
 				ret3 = initialize_enclave(E_PATH3, &launch_token3, &launch_token_updated3, &e3_enclave_id);
-				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+				printf("\nThread: %d created Enclave %lu",omp_get_thread_num(),e3_enclave_id);
 			}
 		}
 	}
@@ -394,10 +393,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		return 0;
 	}
 	
+	/*
     printf("\nAvaliable Enclaves");
     printf("\nEnclave1 - EnclaveID %" PRIx64, e1_enclave_id);
     printf("\nEnclave2 - EnclaveID %" PRIx64, e2_enclave_id);
     printf("\nEnclave3 - EnclaveID %" PRIx64, e3_enclave_id);
+    */
     
 	//attestation goes here
     sgx_status_t status12;
@@ -417,6 +418,7 @@ int _tmain(int argc, _TCHAR* argv[])
     int error_stage31;
     
     // parallel enclave local attestation=================================
+    printf("\n\n====Enclaves local attestation session section==========");
     #pragma omp parallel
 	{
 		#pragma omp sections
@@ -424,24 +426,22 @@ int _tmain(int argc, _TCHAR* argv[])
 			#pragma omp section
 			{
 				status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
-				//printf("\nThread: %d started Section 1.1",omp_get_thread_num());
-
+				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e2_enclave_id);
 			}
 			#pragma omp section
 			{
 				status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
-				//printf("\nThread: %d started Section 1.2",omp_get_thread_num());
-
+			    //printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e3_enclave_id);
 			}
 			#pragma omp section
 			{
 				status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
-				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e2_enclave_id,e3_enclave_id);
 			}
 			#pragma omp section
 			{
 				status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
-				//printf("\nThread: %d started Section 1.3",omp_get_thread_num());
+				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e3_enclave_id,e1_enclave_id);
 			}
 		}
 	}
@@ -482,29 +482,83 @@ int _tmain(int argc, _TCHAR* argv[])
 	else{
 		reportLocalAttestationError(e3_enclave_id, e1_enclave_id, status31,ret_status31, error_stage31);
 	}
+	
+	// parallel attestation session closing=================================
+	printf("\n\n====Closing attestation session section==========");
+    #pragma omp parallel
+	{
+		#pragma omp sections
+		{
+			#pragma omp section
+			{
+				status12 = closeLocalAttestationSession(e1_enclave_id, e2_enclave_id, &ret_status12);
+				//printf("\nThread: %d closed attestation session between Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e2_enclave_id);
+			}
+			#pragma omp section
+			{
+				status13 = closeLocalAttestationSession(e1_enclave_id, e3_enclave_id, &ret_status13);
+				//printf("\nThread: %d closed attestation session between Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e3_enclave_id);
+			}
+			#pragma omp section
+			{
+				status23 = closeLocalAttestationSession(e2_enclave_id, e3_enclave_id, &ret_status23);
+				//printf("\nThread: %d closed attestation session between Enclave %lu and Enclave %lu",omp_get_thread_num(),e2_enclave_id,e3_enclave_id);
+			}
+			#pragma omp section
+			{
+				status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
+				//printf("\nThread: %d closed attestation session between Enclave %lu and Enclave %lu",omp_get_thread_num(),e3_enclave_id,e1_enclave_id);
+			}
+		}
+	}
+
+    // parallel attestation session closing=================================
 
 	//closing local attestation session between enclave 1 & 2
-	status12 = closeLocalAttestationSession(e1_enclave_id, e2_enclave_id, &ret_status12);
+	//status12 = closeLocalAttestationSession(e1_enclave_id, e2_enclave_id, &ret_status12);
 	reportCloseAttestationSessionStatus(e1_enclave_id, e2_enclave_id, status12 , ret_status12);
 	
 	//closing local attestation session between enclave 1 & 3
-	status13 = closeLocalAttestationSession(e1_enclave_id, e3_enclave_id, &ret_status13);
+	//status13 = closeLocalAttestationSession(e1_enclave_id, e3_enclave_id, &ret_status13);
 	reportCloseAttestationSessionStatus(e1_enclave_id, e3_enclave_id, status13 , ret_status13);
 	
 	//closing local attestation session between enclave 2 & 3
-	status23 = closeLocalAttestationSession(e2_enclave_id, e3_enclave_id, &ret_status23);
+	//status23 = closeLocalAttestationSession(e2_enclave_id, e3_enclave_id, &ret_status23);
 	reportCloseAttestationSessionStatus(e2_enclave_id, e3_enclave_id, status23 , ret_status23);
 	
 	//closing local attestation session between enclave 3 & 1
-	status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
+	//status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
 	reportCloseAttestationSessionStatus(e3_enclave_id, e1_enclave_id, status31 , ret_status31);
 	//attestation ends
 	
-	
-	//destroy all enclaves
-    sgx_destroy_enclave(e1_enclave_id);
-    sgx_destroy_enclave(e2_enclave_id);
-    sgx_destroy_enclave(e3_enclave_id);
+	// parallel enclave destruction=================================
+	printf("\n\n====Destroying enclaves section==========");
+    #pragma omp parallel
+	{
+		#pragma omp sections
+		{
+			#pragma omp section
+			{
+				sgx_destroy_enclave(e1_enclave_id);
+				printf("\nThread: %d destryed Enclave %lu",omp_get_thread_num(),e1_enclave_id);
+			}
+			#pragma omp section
+			{
+				sgx_destroy_enclave(e2_enclave_id);
+				printf("\nThread: %d destryed Enclave %lu",omp_get_thread_num(),e2_enclave_id);
+			}
+			#pragma omp section
+			{
+				sgx_destroy_enclave(e3_enclave_id);
+				printf("\nThread: %d destryed Enclave %lu",omp_get_thread_num(),e3_enclave_id);
+			}
+		}
+	}
+    // parallel enclave destruction=================================
+
+    //sgx_destroy_enclave(e1_enclave_id);
+    //sgx_destroy_enclave(e2_enclave_id);
+    //sgx_destroy_enclave(e3_enclave_id);
 
     //waitForKeyPress();
 	printf("\n");

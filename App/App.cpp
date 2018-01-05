@@ -417,38 +417,10 @@ int _tmain(int argc, _TCHAR* argv[])
     uint32_t ret_status31;
     int error_stage31;
     
-    // parallel enclave local attestation=================================
     printf("\n\n====Enclaves local attestation session section==========");
-    #pragma omp parallel
-	{
-		#pragma omp sections
-		{
-			#pragma omp section
-			{
-				status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
-				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e2_enclave_id);
-			}
-			#pragma omp section
-			{
-				status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
-			    //printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e1_enclave_id,e3_enclave_id);
-			}
-			#pragma omp section
-			{
-				status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
-				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e2_enclave_id,e3_enclave_id);
-			}
-			#pragma omp section
-			{
-				status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
-				//printf("\nThread: %d attested Enclave %lu and Enclave %lu",omp_get_thread_num(),e3_enclave_id,e1_enclave_id);
-			}
-		}
-	}
-    // parallel enclave local attestation=================================
     
     //local attestation 1 &2
-    //status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
+    status12 = enclavesLocalAttestation(e1_enclave_id, e2_enclave_id, &ret_status12, &error_stage12);
     if(status12==SGX_SUCCESS && ret_status12==0){
 		reportLocalAttestationSuccess(e1_enclave_id, e2_enclave_id);
 	}
@@ -457,7 +429,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
     
     //local attestation 1 & 3
-    //status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
+    status13 = enclavesLocalAttestation(e1_enclave_id, e3_enclave_id, &ret_status13, &error_stage13);
     if(status13==SGX_SUCCESS && ret_status13==0){
 		reportLocalAttestationSuccess(e1_enclave_id, e3_enclave_id);
 	}
@@ -466,7 +438,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	//local attestation 2 & 3
-	//status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
+	status23 = enclavesLocalAttestation(e2_enclave_id, e3_enclave_id, &ret_status23, &error_stage23);
     if(status23==SGX_SUCCESS && ret_status23==0){
 		reportLocalAttestationSuccess(e2_enclave_id, e3_enclave_id);
 	}
@@ -475,14 +447,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	//local attestation 3 & 1
-	//status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
+	status31 = enclavesLocalAttestation(e3_enclave_id, e1_enclave_id, &ret_status31, &error_stage31);
     if(status31==SGX_SUCCESS && ret_status31==0){
 		reportLocalAttestationSuccess(e3_enclave_id, e1_enclave_id);
 	}
 	else{
 		reportLocalAttestationError(e3_enclave_id, e1_enclave_id, status31,ret_status31, error_stage31);
 	}
-	
+	/*
 	// parallel attestation session closing=================================
 	printf("\n\n====Closing attestation session section==========");
     #pragma omp parallel
@@ -512,22 +484,23 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
-    // parallel attestation session closing=================================
-
+    // parallel attestation session closing================================= */
+	
+	printf("\n\n====Closing attestation session section==========");
 	//closing local attestation session between enclave 1 & 2
-	//status12 = closeLocalAttestationSession(e1_enclave_id, e2_enclave_id, &ret_status12);
+	status12 = closeLocalAttestationSession(e1_enclave_id, e2_enclave_id, &ret_status12);
 	reportCloseAttestationSessionStatus(e1_enclave_id, e2_enclave_id, status12 , ret_status12);
 	
 	//closing local attestation session between enclave 1 & 3
-	//status13 = closeLocalAttestationSession(e1_enclave_id, e3_enclave_id, &ret_status13);
+	status13 = closeLocalAttestationSession(e1_enclave_id, e3_enclave_id, &ret_status13);
 	reportCloseAttestationSessionStatus(e1_enclave_id, e3_enclave_id, status13 , ret_status13);
 	
 	//closing local attestation session between enclave 2 & 3
-	//status23 = closeLocalAttestationSession(e2_enclave_id, e3_enclave_id, &ret_status23);
+	status23 = closeLocalAttestationSession(e2_enclave_id, e3_enclave_id, &ret_status23);
 	reportCloseAttestationSessionStatus(e2_enclave_id, e3_enclave_id, status23 , ret_status23);
 	
 	//closing local attestation session between enclave 3 & 1
-	//status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
+	status31 = closeLocalAttestationSession(e3_enclave_id, e1_enclave_id, &ret_status31);
 	reportCloseAttestationSessionStatus(e3_enclave_id, e1_enclave_id, status31 , ret_status31);
 	//attestation ends
 	
